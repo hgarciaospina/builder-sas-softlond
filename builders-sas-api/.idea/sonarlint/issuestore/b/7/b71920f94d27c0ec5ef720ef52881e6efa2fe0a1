@@ -1,0 +1,13 @@
+
+~
+java:S11924"\Define a constant instead of duplicating this literal "No existe UserRole con ID: " 3 times.(©Ù–Õıÿÿÿÿ8ÌÅ‡¦3
+`
+java:S2387">"repository" is the name of a field in "AbstractAsyncService".(†—íŒüÿÿÿÿ8éÅ‡¦3
+W
+java:S2387":"mapper" is the name of a field in "AbstractAsyncService".(èçˆ8éÅ‡¦3
+b
+java:S2387"@"asyncService" is the name of a field in "AbstractAsyncService".(¿Ì¡ıÿÿÿÿ8êÅ‡¦3
+b
+java:S1612"?Replace this lambda with method reference 'existing::withUser'.(¡÷Şùÿÿÿÿ8£ÖŠ¦3
+b
+java:S1612¦"?Replace this lambda with method reference 'existing::withRole'.(Ëƒæùøÿÿÿÿ8¦ÖŠ¦3

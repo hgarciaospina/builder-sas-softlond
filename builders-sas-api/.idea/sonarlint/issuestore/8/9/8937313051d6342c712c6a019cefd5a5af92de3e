@@ -1,0 +1,7 @@
+
+n	java:S117Ò"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(†‚¢¿8Ó¤ÚŠ¨3
+n	java:S117Ş"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(†‚¢¿8Õ¤ÚŠ¨3
+L
+java:S2201E"/The return value of "orElseThrow" must be used.(½ïûï8ø¿ôŠ¨3
+n
+java:S3457"Q%n should be used in place of \n to produce the platform-specific line separator.(ó£`8¯ÀôŠ¨3

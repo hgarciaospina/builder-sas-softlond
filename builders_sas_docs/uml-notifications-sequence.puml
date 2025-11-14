@@ -1,0 +1,35 @@
+@startuml
+title Builders-SAS - Flujo de Notificaciones Asincronas
+
+actor User as U
+participant "API Backend" as API
+participant "NotificationService" as NS
+participant "NotificationStorage" as STORE
+participant "Webhook externo" as WH
+
+U -> API : POST /api/v1/construction-requests
+API -> API : validar y persistir request
+API -> NS : sendAsync(NotificationDto)
+activate NS
+
+NS -> NS : enrich(dto + timestamp, trackingId)
+NS -> WH : HTTP POST (async)
+
+alt OK
+  WH --> NS : 200 OK
+  NS -> STORE : add(dto)
+  NS --> API : CompletableFuture completed
+else Error
+  WH --> NS : error / timeout
+  NS -> NS : planificar reintentos (maxRetries, retryDelay)
+  loop reintentos
+    NS -> WH : HTTP POST retry
+    WH --> NS : respuesta (OK o error)
+  end
+  NS -> STORE : add(dto con estado error)
+end
+
+deactivate NS
+API --> U : 201 Created (sin bloquear por webhook)
+
+@enduml

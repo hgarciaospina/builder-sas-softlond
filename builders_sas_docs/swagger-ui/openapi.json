@@ -1,0 +1,487 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Builders-SAS API",
+    "version": "1.0.0",
+    "description": "Especificación OpenAPI 3 de la API Builders‑SAS: gestión de solicitudes de construcción, órdenes automáticas, notificaciones asíncronas y utilidades de CRON.",
+    "contact": {
+      "name": "Ingeniero de Sistemas. Henry García Ospina",
+      "email": "henrygarciaospina@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9090",
+      "description": "Servidor local de desarrollo"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Construction Requests",
+      "description": "Gestión de solicitudes de construcción."
+    },
+    {
+      "name": "Notifications",
+      "description": "Consulta y gestión de notificaciones en memoria."
+    },
+    {
+      "name": "Cron",
+      "description": "Utilidades para probar y simular procesos de CRON."
+    }
+  ],
+  "paths": {
+    "/api/v1/construction-requests": {
+      "get": {
+        "tags": [
+          "Construction Requests"
+        ],
+        "summary": "Listar solicitudes de construcción",
+        "operationId": "listConstructionRequests",
+        "responses": {
+          "200": {
+            "description": "Listado de solicitudes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConstructionRequest"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Construction Requests"
+        ],
+        "summary": "Crear una nueva solicitud de construcción",
+        "operationId": "createConstructionRequest",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "description": "Identificador del usuario que realiza la solicitud.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConstructionRequestCreate"
+              },
+              "examples": {
+                "ejemploBasico": {
+                  "summary": "Solicitud típica",
+                  "value": {
+                    "projectId": 1,
+                    "constructionTypeId": 1,
+                    "latitude": 10.123,
+                    "longitude": 20.456,
+                    "observations": "Cimentación inicial torre A"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitud creada correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConstructionRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o parámetros faltantes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/construction-requests/{id}": {
+      "get": {
+        "tags": [
+          "Construction Requests"
+        ],
+        "summary": "Obtener detalles de una solicitud específica",
+        "operationId": "getConstructionRequestById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador de la solicitud.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Solicitud encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConstructionRequest"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Solicitud no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/construction-requests/{id}/status": {
+      "put": {
+        "tags": [
+          "Construction Requests"
+        ],
+        "summary": "Actualizar el estado de una solicitud",
+        "operationId": "updateConstructionRequestStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador de la solicitud.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStatusRequest"
+              },
+              "examples": {
+                "aprobar": {
+                  "summary": "Aprobar solicitud",
+                  "value": {
+                    "status": "APPROVED"
+                  }
+                },
+                "rechazar": {
+                  "summary": "Rechazar solicitud",
+                  "value": {
+                    "status": "REJECTED"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConstructionRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Estado inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Solicitud no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Listar notificaciones en memoria",
+        "operationId": "listNotifications",
+        "responses": {
+          "200": {
+            "description": "Listado de notificaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Limpiar almacenamiento de notificaciones (si está habilitado)",
+        "operationId": "clearNotifications",
+        "responses": {
+          "204": {
+            "description": "Notificaciones eliminadas"
+          }
+        }
+      }
+    },
+    "/api/v1/cron/test/progress": {
+      "get": {
+        "tags": [
+          "Cron"
+        ],
+        "summary": "Simular avance de órdenes para una fecha específica",
+        "operationId": "testCronProgress",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "description": "Fecha de simulación en formato ISO (YYYY-MM-DD).",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado de la simulación del cron",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CronProgressResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Fecha inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConstructionRequestCreate": {
+        "type": "object",
+        "required": [
+          "projectId",
+          "constructionTypeId",
+          "latitude",
+          "longitude"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Identificador del proyecto asociado."
+          },
+          "constructionTypeId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Identificador del tipo de construcción."
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitud donde se ejecutará la construcción."
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitud donde se ejecutará la construcción."
+          },
+          "observations": {
+            "type": "string",
+            "description": "Observaciones adicionales sobre la solicitud."
+          }
+        }
+      },
+      "ConstructionRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "projectId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "constructionTypeId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "observations": {
+            "type": "string"
+          },
+          "requestDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "requestedByUserId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "NotificationDto": {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "description": "Tipo de evento que originó la notificación."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Momento en que se generó la notificación."
+          },
+          "payload": {
+            "type": "string",
+            "description": "Carga útil en formato JSON (stringificado)."
+          }
+        }
+      },
+      "UpdateStatusRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ],
+            "description": "Nuevo estado de la solicitud."
+          }
+        }
+      },
+      "CronProgressResponse": {
+        "type": "object",
+        "properties": {
+          "progressed": {
+            "type": "boolean",
+            "description": "Indica si el cron avanzó alguna orden."
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensaje de detalle del resultado."
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

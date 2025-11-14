@@ -1,0 +1,27 @@
+notification:
+  webhook-url: "https://webhook.site/450a7686-e88d-430c-9575-8276fd6e5613"
+  external-enabled: true
+
+logging:
+  level:
+    root: INFO
+
+    # Asegurar que NO estás heredando DEBUG desde ningún lado
+    com.builderssas.api: INFO
+    com.builderssas.api.cron: INFO
+
+    # ❌ Apagar SQL COMPLETAMENTE
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+
+    # ⚠️ CRÍTICO: este APAGA todo el SQL generado internamente
+    org.hibernate: INFO
+
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate.show_sql: false
+      hibernate.format_sql: false
+      hibernate.highlight_sql: false

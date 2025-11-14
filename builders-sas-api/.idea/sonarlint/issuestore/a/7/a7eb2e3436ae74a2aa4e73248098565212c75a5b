@@ -1,0 +1,8 @@
+
+Z	java:S106G"9Replace this use of System.out or System.err by a logger.(‹İîÿÿÿÿÿÿ8¶ÎÚŠ¨3
+Z	java:S106J"9Replace this use of System.out or System.err by a logger.(§¡ğÔÿÿÿÿÿ8†ÏÚŠ¨3
+[	java:S106‰"9Replace this use of System.out or System.err by a logger.(ìØ¨¼øÿÿÿÿ8ìÏÚŠ¨3
+f
+java:S5361"HReplace this call to "replaceAll()" by a call to the "replace()" method.(¥Ÿ§8ôÏÚŠ¨3
+E
+java:S1068"(Remove this unused "BLUE" private field.(Ä¤Õ²8ƒĞÚŠ¨3

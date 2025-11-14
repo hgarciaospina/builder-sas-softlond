@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- ========================================================= -->
+    <!-- 🔥 APAGAR SQL DE HIBERNATE (SIGUE APAGADO)               -->
+    <!-- ========================================================= -->
+    <logger name="org.hibernate.SQL" level="OFF" additivity="false"/>
+    <logger name="org.hibernate.orm.jdbc.bind" level="OFF" additivity="false"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="OFF" additivity="false"/>
+    <logger name="org.hibernate.engine.jdbc" level="OFF" additivity="false"/>
+    <logger name="org.hibernate" level="WARN" additivity="false"/>
+
+    <!-- ========================================================= -->
+    <!-- 🎨 APPENDER CON COLORES PERSONALIZADOS                   -->
+    <!-- ========================================================= -->
+    <appender name="COLORED_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--
+            %highlight = colores según nivel
+            %cyan, %blue, %red, %green, %yellow, %magenta = colores extra
+            -->
+            <pattern>
+                %cyan(%d{dd-MM HH:mm:ss})
+                %highlight(%-5level)
+                [%green(%thread)]
+                %yellow(%logger{20}) -
+                %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- ========================================================= -->
+    <!-- 🎯 COLORES POR MÓDULOS / PAQUETES                         -->
+    <!-- ========================================================= -->
+
+    <!-- 🟦 CRON -->
+    <logger name="com.builderssas.api.cron" level="INFO" additivity="false">
+        <appender-ref ref="COLORED_CONSOLE"/>
+    </logger>
+
+    <!-- 🟩 NOTIFICATIONS -->
+    <logger name="com.builderssas.api.services.notification" level="INFO" additivity="false">
+        <appender-ref ref="COLORED_CONSOLE"/>
+    </logger>
+
+    <!-- 🟧 RETRY -->
+    <logger name="org.springframework.retry" level="INFO" additivity="false">
+        <appender-ref ref="COLORED_CONSOLE"/>
+    </logger>
+
+    <!-- 🟪 CONTROLLERS -->
+    <logger name="com.builderssas.api.controller" level="INFO" additivity="false">
+        <appender-ref ref="COLORED_CONSOLE"/>
+    </logger>
+
+    <!-- 🟨 SERVICES GENERALES (menos notifications que ya tiene color) -->
+    <logger name="com.builderssas.api.services" level="INFO" additivity="false">
+        <appender-ref ref="COLORED_CONSOLE"/>
+    </logger>
+
+    <!-- 🟥 ERRORES A NIVEL GLOBAL -->
+    <logger name="com.builderssas.api.core.exception" level="ERROR" additivity="false">
+        <appender-ref ref="COLORED_CONSOLE"/>
+    </logger>
+
+    <!-- ========================================================= -->
+    <!-- 🌍 ROOT LOGGER (SE MANTIENE)                              -->
+    <!-- ========================================================= -->
+    <root level="INFO">
+        <appender-ref ref="COLORED_CONSOLE"/>
+    </root>
+
+</configuration>

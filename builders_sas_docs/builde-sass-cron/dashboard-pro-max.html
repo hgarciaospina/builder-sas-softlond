@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Builders-SAS — Dashboard PRO MAX</title>
+
+  <!-- Chart.js + jsPDF + html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f5f7fa; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --primary:#2563eb;
+      --accent:#8b5cf6; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --border:#e5e7eb;
+    }
+    [data-theme="dark"]{
+      --bg:#0b1220; --card:#0f172a; --text:#e5e7eb; --muted:#9ca3af; --primary:#3b82f6;
+      --accent:#a78bfa; --ok:#34d399; --warn:#fbbf24; --err:#f87171; --border:#1f2937;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:20px; background:var(--bg); color:var(--text); font-family:system-ui,Segoe UI,Arial,sans-serif;
+    }
+
+    /* Header con logo */
+    .header{
+      display:flex; align-items:center; gap:12px; margin-bottom:16px;
+    }
+    .header img{
+      width:44px; height:44px; object-fit:contain;
+      background:var(--card); border:1px solid var(--border); border-radius:10px; padding:6px;
+    }
+    .header h1{ margin:0; font-size:22px }
+
+    .toolbar{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:16px;
+    }
+    .left, .right{display:flex; gap:10px; align-items:center}
+    .btn, select, input{
+      padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text);
+      font-size:14px;
+    }
+    .btn{ background:var(--primary); color:#fff; border:none; cursor:pointer }
+    .btn.alt{ background:var(--card); color:var(--text); border:1px solid var(--border) }
+    .btn.ok{ background:var(--ok) }
+    .btn.warn{ background:var(--warn) }
+    .btn:hover{ filter:brightness(1.05) }
+
+    .layout{
+      display:grid; grid-template-columns:320px 1fr; gap:16px;
+    }
+    @media (max-width: 1000px){ .layout{ grid-template-columns:1fr } }
+
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px;
+    }
+    .kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px }
+    .kpi{ text-align:center; border:1px dashed var(--border); border-radius:12px; padding:12px }
+    .kpi h2{ margin:0; font-size:24px }
+    .kpi p{ margin:4px 0 0; color:var(--muted); font-size:12px }
+
+    .filters{ display:grid; gap:8px }
+    .filters label{ font-size:12px; color:var(--muted) }
+
+    .grid table{ width:100%; border-collapse:collapse; }
+    .grid thead th{
+      text-align:left; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); padding:8px;
+    }
+    .grid tbody td{
+      padding:8px; border-bottom:1px solid var(--border); font-size:14px;
+    }
+    .status{ padding:3px 8px; border-radius:999px; font-size:12px; display:inline-block }
+    .PENDING{ background:rgba(245,158,11,.12); color:var(--warn); border:1px solid rgba(245,158,11,.25) }
+    .IN_PROGRESS{ background:rgba(37,99,235,.12); color:var(--primary); border:1px solid rgba(37,99,235,.25) }
+    .FINISHED{ background:rgba(16,185,129,.12); color:var(--ok); border:1px solid rgba(16,185,129,.25) }
+
+    .charts{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
+    .chart-box{ width:320px; height:280px; }
+    .chart-box canvas{ background:var(--card); border:1px solid var(--border); border-radius:12px; width:100% !important; height:240px !important; padding:8px }
+
+    .reports ul{ margin:6px 0 0 16px; padding:0 }
+    .muted{ color:var(--muted); font-size:12px }
+
+    /* Paginación */
+    .pagination{
+      display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:10px;
+    }
+
+    .footer{ text-align:center; margin-top:16px; color:var(--muted); font-size:12px }
+  </style>
+</head>
+<body data-theme="light">
+
+  <!-- Header con logo y título -->
+  <div class="header" id="pageHeader">
+    <img id="logoImg" src="assets/logo-builders-sas.png" alt="Builders-SAS Logo" />
+    <h1>Builders-SAS — Dashboard PRO MAX</h1>
+  </div>
+
+  <div class="toolbar card">
+    <div class="left">
+      <button class="btn alt" id="toggleTheme">Modo oscuro</button>
+      <span class="muted">Auto-refresh:</span>
+      <select id="refreshSec">
+        <option value="0">OFF</option>
+        <option value="5" selected>5s</option>
+        <option value="10">10s</option>
+        <option value="30">30s</option>
+      </select>
+      <button class="btn" id="refreshNow">Actualizar ahora</button>
+    </div>
+
+    <div class="right">
+      <span class="muted">Reporte:</span>
+      <select id="reportOrientation">
+        <option value="p">PDF vertical (portrait)</option>
+        <option value="l">PDF horizontal (landscape)</option>
+      </select>
+      <button class="btn ok" id="btnPdf">Descargar PDF</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Lado izquierdo -->
+    <div>
+      <div class="kpis">
+        <div class="kpi"><h2 id="kpiPending">0</h2><p>Pendientes</p></div>
+        <div class="kpi"><h2 id="kpiProgress">0</h2><p>En progreso</p></div>
+        <div class="kpi"><h2 id="kpiFinished">0</h2><p>Finalizadas</p></div>
+      </div>
+
+      <div class="card filters">
+        <div>
+          <label>Estado</label>
+          <select id="filterStatus">
+            <option value="">Todos</option>
+            <option value="PENDING">Pending</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="FINISHED">Finished</option>
+          </select>
+        </div>
+        <div>
+          <label>Tipo de construcción</label>
+          <select id="filterType">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px">
+          <button class="btn" id="btnApply">Aplicar filtros</button>
+          <button class="btn alt" id="btnClear">Limpiar</button>
+        </div>
+        <div class="muted">Fuente: <code>/api/v1/construction-orders</code></div>
+      </div>
+
+      <div class="card reports" id="reportBox">
+        <h3>Informe requerido</h3>
+        <ul id="reportList"></ul>
+      </div>
+    </div>
+
+    <!-- Lado derecho -->
+    <div>
+      <div class="card grid" id="gridBox">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+          <strong>Órdenes</strong>
+          <span class="muted" id="lastUpdated"></span>
+        </div>
+        <div style="overflow:auto; max-height:52vh; border:1px solid var(--border); border-radius:10px">
+          <table id="ordersTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Proyecto</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- ✅ Controles de paginación -->
+        <div class="pagination">
+          <label class="muted">Filas:</label>
+          <select id="pageSize">
+            <option>5</option>
+            <option selected>10</option>
+            <option>25</option>
+            <option>50</option>
+          </select>
+
+          <button class="btn alt" id="prevPage">&lt;</button>
+          <span class="muted" id="pageInfo">1 / 1</span>
+          <button class="btn alt" id="nextPage">&gt;</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="charts" id="chartsBox">
+          <div class="chart-box"><canvas id="chartStatus"></canvas></div>
+          <div class="chart-box"><canvas id="chartTypes"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Builders-SAS · Dashboard PRO MAX</div>
+
+  <script>
+    // ---------- Estado global ----------
+    let allOrders = [];
+    let filtered = [];
+    let statusChart, typesChart;
+    let refreshTimer = null;
+
+    // Paginación
+    let currentPage = 1;
+    let pageSize = 10;
+
+    const ENDPOINT = "http://localhost:9090/api/v1/construction-orders";
+
+    // ---------- Utilidades ----------
+    const fmt = n => new Intl.NumberFormat().format(n);
+    const nowStr = () => new Date().toLocaleString();
+
+    const setTheme = mode => {
+      document.body.setAttribute("data-theme", mode);
+      document.getElementById("toggleTheme").textContent = (mode === "dark") ? "Modo claro" : "Modo oscuro";
+    };
+
+    // Convierte un recurso (logo) a dataURL para usarlo en PDF
+    async function getDataUrl(url){
+      try{
+        const res = await fetch(url, {cache:"no-store"});
+        const blob = await res.blob();
+        return await new Promise(resolve=>{
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.readAsDataURL(blob);
+        });
+      }catch(e){
+        console.warn("No se pudo cargar el logo:", e);
+        return null;
+      }
+    }
+
+    const populateTypesFilter = (orders) => {
+      const sel = document.getElementById("filterType");
+      const current = sel.value;
+      const types = Array.from(new Set(orders.map(o => o.constructionTypeName))).sort();
+      sel.innerHTML = '<option value="">Todos</option>' + types.map(t => `<option value="${t}">${t}</option>`).join("");
+      if (types.includes(current)) sel.value = current;
+    };
+
+    // ---------- Fetch principal ----------
+    async function loadOrders() {
+      const res = await fetch(ENDPOINT, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      allOrders = Array.isArray(data) ? data : [];
+      document.getElementById("lastUpdated").textContent = "Actualizado: " + nowStr();
+      populateTypesFilter(allOrders);
+      applyFilters(true);
+    }
+
+    // ---------- KPIs ----------
+    function updateKPIs(list) {
+      const p = list.filter(o => o.orderStatus === "PENDING").length;
+      const ip = list.filter(o => o.orderStatus === "IN_PROGRESS").length;
+      const f = list.filter(o => o.orderStatus === "FINISHED").length;
+      document.getElementById("kpiPending").textContent = fmt(p);
+      document.getElementById("kpiProgress").textContent = fmt(ip);
+      document.getElementById("kpiFinished").textContent = fmt(f);
+    }
+
+    // ---------- Grid + paginación ----------
+    function pageCount(total, size){ return Math.max(1, Math.ceil(total / size)); }
+
+    function renderTable(list) {
+      // paginación
+      const totalPages = pageCount(list.length, pageSize);
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const rows = list.slice(start, start + pageSize);
+
+      const tb = document.querySelector("#ordersTable tbody");
+      tb.innerHTML = rows.map(o => `
+        <tr>
+          <td>${o.id}</td>
+          <td>${o.projectName ?? "-"}</td>
+          <td>${o.constructionTypeName ?? "-"}</td>
+          <td><span class="status ${o.orderStatus}">${o.orderStatus}</span></td>
+          <td>${o.scheduledStartDate ?? "-"}</td>
+          <td>${o.scheduledEndDate ?? "-"}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("pageInfo").textContent = `${fmt(currentPage)} / ${fmt(totalPages)}`;
+    }
+
+    // ---------- Filtros ----------
+    function applyFilters(resetPage=false) {
+      const s = document.getElementById("filterStatus").value;
+      const t = document.getElementById("filterType").value;
+      filtered = allOrders
+        .filter(o => !s || o.orderStatus === s)
+        .filter(o => !t || o.constructionTypeName === t);
+
+      if (resetPage) currentPage = 1;
+
+      updateKPIs(filtered);
+      renderTable(filtered);
+      renderReport(filtered);
+      renderCharts(filtered);
+    }
+
+    function clearFilters() {
+      document.getElementById("filterStatus").value = "";
+      document.getElementById("filterType").value = "";
+      currentPage = 1;
+      applyFilters();
+    }
+
+    // ---------- Reporte requerido ----------
+    function renderReport(list) {
+      const pending = list.filter(o => o.orderStatus === "PENDING");
+      const progress = list.filter(o => o.orderStatus === "IN_PROGRESS");
+      const finished = list.filter(o => o.orderStatus === "FINISHED");
+
+      // finalizadas por tipo
+      const byType = {};
+      finished.forEach(o => byType[o.constructionTypeName] = (byType[o.constructionTypeName]||0)+1);
+
+      const html =
+        `<li><b>Pendientes:</b> ${fmt(pending.length)}</li>` +
+        `<li><b>En progreso:</b> ${fmt(progress.length)}</li>` +
+        `<li><b>Finalizadas:</b> ${fmt(finished.length)}</li>` +
+        `<li><b>Finalizadas por tipo:</b></li>` +
+        Object.keys(byType).sort().map(t => `<li> • ${t}: ${fmt(byType[t])}</li>`).join("");
+
+      document.getElementById("reportList").innerHTML = html;
+    }
+
+    // ---------- Gráficas ----------
+    function renderCharts(list) {
+      const statusCounts = {
+        PENDING: list.filter(o => o.orderStatus === "PENDING").length,
+        IN_PROGRESS: list.filter(o => o.orderStatus === "IN_PROGRESS").length,
+        FINISHED: list.filter(o => o.orderStatus === "FINISHED").length,
+      };
+
+      const typeCounts = {};
+      list.forEach(o => typeCounts[o.constructionTypeName] = (typeCounts[o.constructionTypeName]||0)+1);
+
+      if (statusChart) statusChart.destroy();
+      if (typesChart) typesChart.destroy();
+
+      const labelColor = getComputedStyle(document.body).getPropertyValue('--text');
+
+      statusChart = new Chart(document.getElementById("chartStatus"), {
+        type:"doughnut",
+        data:{ labels:["Pending","In Progress","Finished"], datasets:[{ data:[statusCounts.PENDING, statusCounts.IN_PROGRESS, statusCounts.FINISHED] }] },
+        options:{ plugins:{ legend:{ labels:{ color:labelColor } } } }
+      });
+
+      typesChart = new Chart(document.getElementById("chartTypes"), {
+        type:"bar",
+        data:{ labels:Object.keys(typeCounts), datasets:[{ label:"Órdenes por tipo", data:Object.values(typeCounts) }] },
+        options:{
+          scales:{
+            x:{ ticks:{ color:labelColor } },
+            y:{ ticks:{ color:labelColor } }
+          },
+          plugins:{ legend:{ labels:{ color:labelColor } } }
+        }
+      });
+    }
+
+    // ---------- PDF ----------
+    async function generatePDF(orientation /* 'p' | 'l' */) {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation, unit:'pt', format:'a4' });
+
+      const title = "Builders-SAS — Informe de Órdenes";
+      const date = new Date().toLocaleString();
+      const pageW = (orientation==='l' ? 842 : 595); // aprox A4 en pt (landscape/portrait)
+
+      // Logo dataURL
+      const logoDataUrl = await getDataUrl(document.getElementById("logoImg").src);
+
+      // Header
+      const addHeader = (page=1, total=1) => {
+        if (logoDataUrl){
+          // dibuja logo a la izquierda
+          pdf.addImage(logoDataUrl,'PNG', 40, 20, 28, 28);
+        }
+        pdf.setFontSize(14); pdf.text(title, 78, 35);
+        pdf.setFontSize(10); pdf.setTextColor(120); pdf.text(`Fecha: ${date}`, 78, 50);
+        pdf.setTextColor(120); pdf.text(`Página ${page} de ${total}`, pageW - 40, 35, { align:'right' });
+        pdf.setDrawColor(200); pdf.line(40, 58, pageW - 40, 58);
+        pdf.setTextColor(0);
+      };
+
+      // 1) Informe requerido
+      addHeader(1, 1);
+      const reportHTML = document.getElementById('reportBox');
+      const reportCanvas = await html2canvas(reportHTML, { backgroundColor:null, scale:2 });
+      const repImg = reportCanvas.toDataURL("image/png");
+      const maxW = pageW - 80;
+      const ratio = reportCanvas.width / reportCanvas.height;
+      const imgW = Math.min(maxW, reportCanvas.width);
+      const imgH = imgW / ratio;
+      pdf.addImage(repImg, 'PNG', 40, 70, imgW, imgH);
+
+      // 2) Grid (tabla)
+      pdf.addPage(orientation, 'a4');
+      addHeader(2, 2);
+      const gridEl = document.getElementById('gridBox');
+      const gridCanvas = await html2canvas(gridEl, { backgroundColor:null, scale:2, windowWidth: gridEl.scrollWidth, windowHeight: gridEl.scrollHeight });
+      const gridImg = gridCanvas.toDataURL("image/png");
+      const gRatio = gridCanvas.width / gridCanvas.height;
+      const gW = pageW - 80;
+      const gH = gW / gRatio;
+      pdf.addImage(gridImg, 'PNG', 40, 70, gW, gH);
+
+      // 3) Gráficas
+      pdf.addPage(orientation, 'a4');
+      addHeader(3, 3);
+      const chartsEl = document.getElementById('chartsBox');
+      const chartsCanvas = await html2canvas(chartsEl, { backgroundColor:null, scale:2, windowWidth: chartsEl.scrollWidth, windowHeight: chartsEl.scrollHeight });
+      const chartsImg = chartsCanvas.toDataURL("image/png");
+      const cRatio = chartsCanvas.width / chartsCanvas.height;
+      const cW = pageW - 80;
+      const cH = cW / cRatio;
+      pdf.addImage(chartsImg, 'PNG', 40, 70, cW, cH);
+
+      // numeración final
+      const totalPages = pdf.getNumberOfPages();
+      for (let i=1; i<=totalPages; i++){
+        pdf.setPage(i);
+        addHeader(i, totalPages);
+      }
+
+      pdf.save(`BuildersSAS_Informe_${orientation==='l'?'landscape':'portrait'}.pdf`);
+    }
+
+    // ---------- Auto-refresh ----------
+    function setupAutoRefresh() {
+      const sel = document.getElementById('refreshSec');
+      if (refreshTimer) clearInterval(refreshTimer);
+      const sec = parseInt(sel.value, 10);
+      if (sec > 0) {
+        refreshTimer = setInterval(loadOrders, sec * 1000);
+      }
+    }
+
+    // ---------- Eventos UI ----------
+    document.getElementById('toggleTheme').addEventListener('click', () => {
+      const current = document.body.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+      renderCharts(filtered); // relabel colors
+    });
+    document.getElementById('refreshNow').addEventListener('click', loadOrders);
+    document.getElementById('refreshSec').addEventListener('change', setupAutoRefresh);
+    document.getElementById('btnApply').addEventListener('click', () => applyFilters(true));
+    document.getElementById('btnClear').addEventListener('click', clearFilters);
+    document.getElementById('btnPdf').addEventListener('click', () => {
+      const ori = document.getElementById('reportOrientation').value; // 'p' o 'l'
+      generatePDF(ori);
+    });
+
+    // Paginación events
+    document.getElementById('pageSize').addEventListener('change', (e)=>{
+      pageSize = parseInt(e.target.value,10);
+      currentPage = 1;
+      renderTable(filtered);
+    });
+    document.getElementById('prevPage').addEventListener('click', ()=>{
+      currentPage = Math.max(1, currentPage - 1);
+      renderTable(filtered);
+    });
+    document.getElementById('nextPage').addEventListener('click', ()=>{
+      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      currentPage = Math.min(totalPages, currentPage + 1);
+      renderTable(filtered);
+    });
+
+    // ---------- Init ----------
+    (async () => {
+      setTheme('light');
+      await loadOrders();
+      setupAutoRefresh();
+    })();
+  </script>
+</body>
+</html>

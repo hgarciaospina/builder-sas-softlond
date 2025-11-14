@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  api:
+    container_name: builders-sas-api
+    build: .
+    ports:
+      - "9090:9090"
+    environment:
+      # Perfil de Spring
+      SPRING_PROFILES_ACTIVE: prod
+
+      # Configuración JDBC (JPA)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/builders_sas
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: secret
+
+      # Configuración de Hibernate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+
+      # Configuración de Flyway (migraciones)
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_URL: jdbc:postgresql://db:5432/builders_sas
+      SPRING_FLYWAY_USER: admin
+      SPRING_FLYWAY_PASSWORD: secret
+
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  db:
+    container_name: builders-sas-db
+    image: postgres:16
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: builders_sas
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d builders_sas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres_data:

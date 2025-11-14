@@ -1,0 +1,72 @@
+@startuml
+title Builders-SAS - Diagrama de Clases de Dominio
+
+class Project {
+  +Long id
+  +String name
+}
+
+class ConstructionType {
+  +Long id
+  +String name
+  +int durationDays
+}
+
+class ConstructionRequest {
+  +Long id
+  +LocalDate requestDate
+  +RequestStatus status
+  +Double latitude
+  +Double longitude
+}
+
+class ConstructionOrder {
+  +Long id
+  +LocalDate startDate
+  +LocalDate endDate
+  +OrderStatus status
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus {
+  SCHEDULED
+  IN_PROGRESS
+  FINISHED
+}
+
+class NotificationDto {
+  +String eventType
+  +String timestamp
+  +String payload
+}
+
+class ConstructionRequestService
+class ConstructionOrderService
+class MorningCronService
+class NightCronService
+class NotificationService
+class NotificationStorage
+
+Project "1" -- "0..*" ConstructionRequest
+Project "1" -- "0..*" ConstructionOrder
+ConstructionType "1" -- "0..*" ConstructionRequest
+ConstructionRequest "1" -- "0..1" ConstructionOrder
+
+ConstructionRequestService --> ConstructionRequest
+ConstructionOrderService --> ConstructionOrder
+MorningCronService --> ConstructionOrderService
+NightCronService --> ConstructionOrderService
+
+ConstructionRequestService --> NotificationService : send creation
+MorningCronService --> NotificationService : send start
+NightCronService --> NotificationService : send finish
+
+NotificationService --> NotificationDto
+NotificationService --> NotificationStorage
+
+@enduml

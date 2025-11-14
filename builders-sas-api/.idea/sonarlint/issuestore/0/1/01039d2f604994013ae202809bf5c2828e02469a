@@ -1,0 +1,11 @@
+
+ä
+java:S1598"ÆThis file "ConstructionOrderAsyncService.java" should be located in "com\builderssas\api\zombie" directory, not in "D:\builders-sas\builders-sas-api\src\main\java\com\builderssas\api\services\impl".(àŒ¥´8»äÊ¶¦3
+e
+java:S6355"HAdd 'since' and/or 'forRemoval' arguments to the @Deprecated annotation.(°Å·Õ8¼äÊ¶¦3
+R
+java:S1133"5Do not forget to remove this deprecated code someday.(ÉŽù±8¼äÊ¶¦3
+E
+java:S1123"(Add the missing @deprecated Javadoc tag.(ÉŽù±8¾äÊ¶¦3
+T
+java:S1135"2Complete the task associated to this TODO comment.(å“‹öþÿÿÿÿ8¿äÊ¶¦3

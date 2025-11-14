@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Builders‑SAS – Documentación de Arquitectura</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0b1120;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    header p {
+      margin: 0.3rem 0 0;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+    nav {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      position: sticky;
+      top: 96px;
+    }
+    nav h2 {
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+    nav ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+    nav li {
+      margin: 0.3rem 0;
+    }
+    nav a {
+      color: #e5e7eb;
+      text-decoration: none;
+      display: block;
+      padding: 0.25rem 0.4rem;
+      border-radius: 0.4rem;
+    }
+    nav a:hover {
+      background: rgba(59, 130, 246, 0.2);
+    }
+    main {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    section {
+      margin-bottom: 2rem;
+    }
+    section h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+      color: #bfdbfe;
+    }
+    section h3 {
+      font-size: 1.1rem;
+      color: #e5e7eb;
+      margin-top: 1rem;
+    }
+    code, pre {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85rem;
+    }
+    pre {
+      background: #020617;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+    .tag {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-right: 0.3rem;
+    }
+    .tag-async { background: rgba(34, 197, 94, 0.15); color: #bbf7d0; border: 1px solid rgba(34, 197, 94, 0.6); }
+    .tag-cron { background: rgba(59, 130, 246, 0.15); color: #bfdbfe; border: 1px solid rgba(59, 130, 246, 0.6); }
+    .tag-domain { background: rgba(249, 115, 22, 0.1); color: #fed7aa; border: 1px solid rgba(249, 115, 22, 0.6); }
+    .tag-swagger { background: rgba(244, 234, 65, 0.12); color: #fef08a; border: 1px solid rgba(244, 234, 65, 0.7); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.8rem;
+      margin-right: 0.25rem;
+    }
+    .pill span {
+      font-size: 0.8rem;
+    }
+    a.inline-link {
+      color: #93c5fd;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+    }
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      nav {
+        position: static;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Builders‑SAS – Documentación de Arquitectura</h1>
+    <p>Motor de solicitudes, órdenes y notificaciones asíncronas para proyectos de construcción.</p>
+  </header>
+  <div class="container">
+    <nav>
+      <h2>Índice</h2>
+      <ul>
+        <li><a href="#vision">1. Visión General</a></li>
+        <li><a href="#arquitectura">2. Arquitectura General</a></li>
+        <li><a href="#modulos">3. Módulos y Responsabilidades</a></li>
+        <li><a href="#notificaciones">4. Notificaciones y Reintentos</a></li>
+        <li><a href="#asincronia">5. Asincronía y Concurrencia</a></li>
+        <li><a href="#swagger">6. Documentación de API (Swagger)</a></li>
+        <li><a href="#uml">7. Diagramas UML</a></li>
+        <li><a href="#uso">8. Cómo usar esta documentación</a></li>
+      </ul>
+    </nav>
+    <main>
+      <section id="vision">
+        <h2>1. Visión General</h2>
+        <p>
+          Builders‑SAS es una plataforma backend orientada a la gestión profesional de
+          <strong>solicitudes de construcción</strong> que se convierten en
+          <strong>órdenes de construcción</strong> mediante procesos automáticos,
+          impulsados por <span class="pill"><span>CRON jobs</span></span>,
+          <span class="pill"><span>notificaciones asíncronas</span></span> y
+          <span class="pill"><span>reintentos concurrentes</span></span>.
+        </p>
+        <p>
+          No existen endpoints públicos para crear órdenes manualmente.
+          Las <code>ConstructionOrder</code> se generan de forma derivada a partir de
+          <code>ConstructionRequest</code> en estado <code>APPROVED</code>.
+        </p>
+      </section>
+
+      <section id="arquitectura">
+        <h2>2. Arquitectura General</h2>
+        <span class="tag tag-domain">Dominio</span>
+        <span class="tag tag-cron">CRON</span>
+        <span class="tag tag-async">Async</span>
+        <pre><code>Usuario / Frontend
+  │
+  ├── POST /api/v1/construction-requests
+  ▼
+ConstructionRequestService
+  │   ├─ Validación
+  │   ├─ Persistencia
+  │   └─ Notificación de creación
+  ▼
+MorningCronService (07:00)
+  │   ├─ Lee requests APPROVED
+  │   ├─ Calcula fechas inicio/fin
+  │   ├─ Genera ConstructionOrder
+  │   └─ Notifica inicio
+  ▼
+NightCronService (22:00)
+  │   ├─ Detecta órdenes que terminan HOY
+  │   ├─ Marca FINISHED
+  │   └─ Notifica finalización
+  ▼
+NotificationService (async + retries)
+  │   ├─ POST a Webhook externo
+  │   ├─ Reintentos
+  │   └─ Storage en memoria
+  ▼
+Frontend Angular (campana + modal de notificaciones)</code></pre>
+      </section>
+
+      <section id="modulos">
+        <h2>3. Módulos y Responsabilidades</h2>
+
+        <h3>3.1 ConstructionRequestService</h3>
+        <p>
+          Expone la funcionalidad de alta de solicitudes y la transición entre estados
+          <code>PENDING</code>, <code>APPROVED</code> y <code>REJECTED</code>.
+        </p>
+        <pre><code>1. POST /api/v1/construction-requests
+2. Validación de usuario, proyecto y tipo
+3. Persistencia como PENDING
+4. Construcción de NotificationDto (creation)
+5. Envío asíncrono a NotificationService</code></pre>
+
+        <h3>3.2 MorningCronService</h3>
+        <span class="tag tag-cron">CRON</span>
+        <p>
+          Orquesta la creación de órdenes a partir de solicitudes aprobadas.
+          La regla de fechas garantiza que cada nueva construcción
+          comience el día siguiente de la solicitud o de la última orden finalizada
+          del mismo proyecto.
+        </p>
+
+        <h3>3.3 NightCronService</h3>
+        <span class="tag tag-cron">CRON</span>
+        <p>
+          Cierra órdenes cuando la fecha de fin coincide con la fecha actual,
+          marcándolas como <code>FINISHED</code> y generando notificaciones de cierre.
+        </p>
+      </section>
+
+      <section id="notificaciones">
+        <h2>4. Notificaciones y Reintentos</h2>
+        <span class="tag tag-async">Async</span>
+        <p>
+          El subsistema de notificaciones se basa en un DTO liviano
+          (<code>NotificationDto</code>) y un servicio que realiza envíos
+          a un webhook externo utilizando <code>CompletableFuture</code> para evitar bloqueos.
+        </p>
+        <pre><code>Evento de negocio
+  │
+  ├─ Construcción de NotificationDto
+  ▼
+NotificationService.sendAsync(dto)
+  │
+  ├─ Envío HTTP a webhook (async)
+  ├─ Si error → reintentos con backoff
+  └─ Almacenamiento en NotificationStorage
+  ▼
+Frontend → GET /api/v1/notifications</code></pre>
+      </section>
+
+      <section id="asincronia">
+        <h2>5. Asincronía y Concurrencia</h2>
+        <span class="tag tag-async">Async</span>
+        <p>
+          La asincronía se logra mediante el uso sistemático de
+          <code>CompletableFuture</code> y pools de hilos dedicados.
+          De este modo:
+        </p>
+        <ul>
+          <li>Las peticiones HTTP no esperan a que el webhook responda.</li>
+          <li>Los CRON jobs pueden procesar múltiples proyectos en paralelo.</li>
+          <li>Los reintentos no afectan el tiempo de respuesta percibido por el usuario.</li>
+        </ul>
+      </section>
+
+      <section id="swagger">
+        <h2>6. Documentación de API con Swagger / OpenAPI</h2>
+        <span class="tag tag-swagger">Swagger</span>
+        <p>
+          La API está preparada para ser documentada mediante Swagger / OpenAPI.
+          Con el backend levantado en <code>http://localhost:9090</code>,
+          las rutas típicas son:
+        </p>
+        <ul>
+          <li><code>/swagger-ui.html</code> o <code>/swagger-ui/index.html</code> – UI interactiva.</li>
+          <li><code>/v3/api-docs</code> – documento OpenAPI en JSON.</li>
+        </ul>
+        <p>
+          Desde esta interfaz se pueden explorar endpoints de
+          <strong>Construction Requests</strong>, <strong>Notifications</strong> y
+          utilidades de <strong>CRON</strong> sin salir del navegador.
+        </p>
+      </section>
+
+      <section id="uml">
+        <h2>7. Diagramas UML</h2>
+        <p>
+          En la carpeta <code>docs/</code> del repositorio se incluyen archivos
+          PlantUML:
+        </p>
+        <ul>
+          <li><code>uml-domain.puml</code> – diagrama de clases de dominio.</li>
+          <li><code>uml-notifications-sequence.puml</code> – diagrama de secuencia de notificaciones.</li>
+        </ul>
+        <p>
+          Estos archivos pueden visualizarse en IntelliJ, VS Code
+          o herramientas online, generando imágenes PNG/SVG para documentación adicional.
+        </p>
+      </section>
+
+      <section id="uso">
+        <h2>8. Cómo usar esta documentación</h2>
+        <p>
+          Copia este archivo en la carpeta <code>docs/</code> de tu proyecto.
+          Puedes abrirlo localmente en el navegador o publicarlo mediante
+          GitHub Pages, una intranet corporativa o cualquier servidor estático.
+        </p>
+        <p>
+          Para una descripción más extensa y en formato texto, revisa también el
+          archivo <code>README.md</code> que acompaña a este HTML.
+        </p>
+      </section>
+    
+<section id="autores" style="background: rgba(15,23,42,0.8); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid rgba(250, 204, 21, 0.5); margin-top: 2rem;">
+  <h2 style="color:#fbbf24;">Autores Oficiales del Proyecto</h2>
+  <h3 style="color:#93c5fd;">👨‍💼 Ingeniero de Sistemas</h3>
+  <p style="margin-left:1rem;">
+    <strong>Henry García Ospina</strong><br>
+    📧 Correo: <strong>henrygarciaospina@gmail.com</strong><br>
+    📱 Celular: <strong>320 515 1194</strong>
+  </p>
+  <h3 style="color:#93c5fd;">👨‍🔧 Ingeniero Electrónico</h3>
+  <p style="margin-left:1rem;">
+    <strong>Luis Ramos</strong><br>
+    📱 Celular: <strong>305 282 6587</strong>
+  </p>
+</section>
+
+<section id="swagger-ui-uso" style="margin-top:2rem;">
+  <h2>9. Swagger UI – Documentación Ejecutable de la API</h2>
+  <p>
+    Este proyecto incluye una versión preparada de <strong>Swagger UI</strong> que
+    permite visualizar y explorar la API Builders‑SAS a partir del archivo
+    <code>openapi.json</code>.
+  </p>
+  <h3>9.1. Estructura de carpetas</h3>
+  <pre><code>docs/
+  ├── README.md
+  ├── architecture.html
+  └── swagger-ui/
+       ├── index.html
+       └── openapi.json</code></pre>
+  <h3>9.2. Uso paso a paso</h3>
+  <ol>
+    <li>Abre el archivo <code>docs/swagger-ui/index.html</code> en tu navegador.</li>
+    <li>Swagger UI cargará automáticamente el archivo <code>openapi.json</code>.</li>
+    <li>En la interfaz verás los endpoints organizados por tags: <em>Construction Requests</em>, <em>Notifications</em>, <em>Cron</em>.</li>
+    <li>Haz clic en cualquier endpoint para ver parámetros, ejemplos y respuestas.</li>
+  </ol>
+  <p>
+    Los recursos CSS/JS de Swagger UI se cargan desde un CDN oficial, por lo que
+    es recomendable tener conexión a Internet al abrir <code>index.html</code>.
+  </p>
+</section>
+
+<section id="diagramas" style="margin-top:2rem;">
+  <h2>10. Diagramas UML y Recursos Visuales</h2>
+  <p>
+    La documentación puede complementarse con diagramas UML generados a partir de archivos
+    <code>.puml</code> (PlantUML), permitiendo visualizar:
+  </p>
+  <ul>
+    <li>Relaciones entre entidades de dominio (Project, ConstructionRequest, ConstructionOrder, NotificationDto).</li>
+    <li>Secuencia de notificaciones asíncronas desde el cliente hasta el webhook externo.</li>
+  </ul>
+  <p>
+    Se recomienda exportar estos diagramas como imágenes (PNG/SVG) y colocarlas en una carpeta
+    <code>docs/img/</code>, enlazándolas desde este mismo documento o desde el README principal.
+  </p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:1.5rem;margin-top:1rem;">
+    <figure style="flex:1;min-width:260px;">
+      <img src="./img/uml-domain.png" alt="Diagrama de Dominio Builders-SAS" style="max-width:100%;border-radius:0.75rem;border:1px solid rgba(148,163,184,0.6);">
+      <figcaption style="font-size:0.85rem;color:#9ca3af;margin-top:0.3rem;">
+        Diagrama de dominio (Project, ConstructionRequest, ConstructionOrder, NotificationService).
+      </figcaption>
+    </figure>
+    <figure style="flex:1;min-width:260px;">
+      <img src="./img/uml-notifications-sequence.png" alt="Diagrama de Secuencia de Notificaciones" style="max-width:100%;border-radius:0.75rem;border:1px solid rgba(148,163,184,0.6);">
+      <figcaption style="font-size:0.85rem;color:#9ca3af;margin-top:0.3rem;">
+        Flujo de notificaciones asincronas: User -> API -> NotificationService -> Webhook -> NotificationStorage.
+      </figcaption>
+    </figure>
+  </div>
+
+</section>
+
+    </main>
+  </div>
+</body>
+</html>
