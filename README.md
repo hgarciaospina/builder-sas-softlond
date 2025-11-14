@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="builders-sas-enterprise.png" width="100%" />
+</p>
+
 # Builders‑SAS – Documentación Enterprise de Arquitectura, API y Concurrencia
 
 Sistema: **Builders‑SAS – Motor de Solicitudes, Órdenes y Notificaciones para Construcción**
